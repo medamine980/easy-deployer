@@ -18,7 +18,11 @@ def main():
     if getOS() == "windows": # to clean the screen
         os.system("cls") #
     # if args["cmd"] == "add-to-path":
-    #     add2Path(args) 
+    #     add2Path(args)
+    if args["git_ignore"]:
+        handleGitIgnore(args["path"])
+    if args["rm_git_ignore"]:
+        handleRmGitIgnore(args["path"])
     if args["cmd"] == "update": # check if -u or --update is present when the user runs the script
         update(args)
         return
@@ -79,10 +83,6 @@ def create_update(args):
                 changeVisibility(username=username, token=token, name=data["name"])
         if(args["add_collaborators"]):
             handleCollaborators(username=username, token=token, name=data["name"])
-    if args["git_ignore"]:
-        handleGitIgnore(args["path"])
-    if args["rm_git_ignore"]:
-        handleRmGitIgnore(args["path"])
     masterToMain(args["path"])
     addRemoteAndPush(url, args["path"])
 
@@ -105,10 +105,6 @@ def update(args):
     if createRepo:
         repoNotFoundError()
     elif not createRepo:
-        if args["git_ignore"]:
-            handleGitIgnore(args["path"])
-        if args["rm_git_ignore"]:
-            handleRmGitIgnore(args["path"])
         masterToMain(args["path"])
         addRemoteAndPush(url, args["path"])
 
@@ -300,6 +296,7 @@ def handleGitIgnore(path):
         with open(f"{path}{os.sep}.gitignore", "a") as f:
             f.write("\n".join(files))
             f.write("\n")
+    handleGitInit(path)
     runCmd(f"git -C {path} add .gitignore", stdout=PIPE, stderr=PIPE)
     runCmd(f"git -C {path} rm -rf --cached .", stdout=PIPE, stderr=PIPE)
 
@@ -315,6 +312,7 @@ def handleRmGitIgnore(path):
     files = [line for line in lines if line not in files]
     with open(f"{path}{os.sep}.gitignore", "w") as f:
         f.write("\n".join(files))
+    handleGitInit(path)
     runCmd(f"git -C {path} add .gitignore", stdout=PIPE, stderr=PIPE)
     runCmd(f"git -C {path} rm -rf --cached .")
 
