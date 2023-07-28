@@ -319,11 +319,11 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
                 commit_again = confirm_input("A git commit is about to happen, are you ok with that")
                 if commit_again:
                     default_git_commit(path)
-                add_remote_and_push(url, path, repo_name, username, token)
+                return add_remote_and_push(url, path, repo_name, username, token)
         else:
             sys.exit(process["returncode"])
-    open_browser(url)
-        
+    loading.stop()
+    open_browser(url)       
 
 #CHECKERS
 def check_repository_name(repo_name):
