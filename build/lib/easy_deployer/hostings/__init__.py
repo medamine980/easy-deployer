@@ -1,1 +1,0 @@
-from easy_deployer.hostings.heroku import main as heroku_main

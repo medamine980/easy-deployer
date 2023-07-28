@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: easy-deployer
-Version: 0.1.8
+Version: 0.1.9
 Summary: A package to simplify and quickly deploy your project/app/folders to the supported platforms.
 Home-page: https://github.com/medamine980/easy-deployer
 Author: Mohamed-Amine Benali
