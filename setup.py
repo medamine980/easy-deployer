@@ -2,27 +2,35 @@ from setuptools import setup, find_packages
 
 with open("README.md") as f:
     long_desc = f.read()
-
 setup(
-    name="simple_deployer",
-    version="0.1.0",
+    name="easy_deployer",
+    version="0.1.8",
+    description="A package to simplify and quickly deploy your project/app/folders to the supported platforms.",
     long_description=long_desc,
     long_description_content_type='text/markdown',
     author="Mohamed-Amine Benali",
-    author_email="namelowy_64@hotmail.com",
-    url="https://github.com/medamine980/simple-deployer",
-    packages=find_packages("simple_deployer", exclude=["simple_deployer.dist"]),
+    author_email="benali.medamine2002@gmail.com",
+    url="https://github.com/medamine980/easy-deployer",
+    packages=find_packages(exclude=["easy_deployer.dist", "easy_deployer.ignore"]),
     license="MIT",
-    keywords=["python", "github", "github-deployer", "heroku", "heroku-deployer", "deploy"],
+    keywords=["python", "github", "github-deployer", "heroku", 
+    "heroku-deployer", "deploy", "easy", "easy-deployer", "simple", "simple-deployer"],
     install_required=["pipreqs"],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.11'
     ],
-    console_scripts={
-        "github-deployer": "simple_deployer.github:main",
-        "heroku-deployer": "simple_deployer.heroku:main"
+    entry_points = {
+        'console_scripts': [
+            'easy-deployer = cli:cli',
+        ]
     }
+    # console_scripts={
+    #     "easy-deployer-github": "easy_deployer.github:main",
+    #     "easy-deployer-heroku": "easy_deployer.heroku:main",
+    #     "easy-deployer": "easy_deployer.main:main"
+    # }
 )
