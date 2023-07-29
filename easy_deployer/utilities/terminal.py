@@ -4,6 +4,7 @@ import os
 from subprocess import Popen, PIPE, DEVNULL
 
 from easy_deployer.utilities.process import Loading, get_os
+from easy_deployer.utilities.interface import text_input
 from easy_deployer.utilities import ERROR_CODES
 
 def check_software(name, cmd, url=None):
@@ -94,7 +95,7 @@ def default_git_commit(path):
         cmds += [
         f"git -C {path} add ."
         ]
-        commit_msg = input("commit message (double quotes are not allowed): ")
+        commit_msg = text_input("commit message (double quotes are not allowed): ", multiline=True)
         if "\"" in commit_msg:
             print("double quotes detected, error!")
             sys.exit(ERROR_CODES["double_quotes_not_allowed"])

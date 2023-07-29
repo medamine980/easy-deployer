@@ -1,3 +1,5 @@
+import click
+
 from typing import Callable
 
 from InquirerPy import inquirer
@@ -6,12 +8,14 @@ from InquirerPy import inquirer
 def text_input(
         message: str, 
         default: str="", 
+        multiline: bool = False,
         invalid_message: str = None,
         validate: Callable[[str], None] = None
         ):
     return inquirer.text(
         message=message,
         default=default,
+        multiline=multiline,
         validate=validate,
         invalid_message=invalid_message,
     ).execute()
@@ -39,15 +43,11 @@ def path_input(
 
 def confirm_input(
         message: str, 
-        default: str="", 
-        invalid_message: str = None,
-        validate: Callable[[str], None] = None
+        default: str=False
         ):
     return inquirer.confirm(
         message=message,
-        default=default,
-        validate=validate,
-        invalid_message=invalid_message,
+        default=default
     ).execute()
 
 def select_input(
@@ -60,6 +60,12 @@ def select_input(
         default=default,
         choices=choices
     ).execute()
+
+def print_color(text, fg="white", bg:str or tuple = None, bold: bool = None, underline: bool = None,
+                overline: bool = None, blink: bool = None, italic: bool = None, dim: bool = None,
+                reverse: bool = None, strikethrough: bool = None, reset: bool = True):
+    click.secho(text, color=True, fg=fg, bg=bg, bold=bold, underline=underline, overline=overline,
+                blink=blink, italic=italic, dim=dim, reverse=reverse, strikethrough=strikethrough, reset=reset)
 
 def print_warning(*text,**keywords):
     print("""

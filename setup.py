@@ -4,7 +4,7 @@ with open("README.md") as f:
     long_desc = f.read()
 setup(
     name="easy_deployer",
-    version="0.1.13",
+    version="0.1.16",
     description="A package to simplify and quickly deploy your project/app/folders to the supported platforms.",
     long_description=long_desc,
     long_description_content_type='text/markdown',
@@ -24,8 +24,7 @@ setup(
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.11'
     ],
     entry_points = {

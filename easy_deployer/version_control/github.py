@@ -12,19 +12,20 @@ from easy_deployer.utilities.terminal import check_software, handle_git_init, de
     ,open_bash
 from easy_deployer.utilities.process import Loading, get_os, open_browser
 from easy_deployer.utilities.interface import path_input, text_input, confirm_input, select_input,\
-    print_warning
+    print_color, print_warning
 
-available_commands = ('create-update', 'update', 'delete')
+available_commands = ('create-update', 'update', 'delete', 'clone')
 
 @click.command(
         help="""You basically enter one of the following commands:\n
         ¤ create-update (which is the default one)\n
         ¤ update (to update an existing repository)\n
         ¤ delete (to delete an existing repository)\n
+        ¤ clone (to clone a repository)
 then you need to specify the path by using the -p or --path argument."""
 )
 @click.option("-cmd", "--command",
-              type=click.Choice(available_commands,case_sensitive=False),
+              type=click.Choice(available_commands,case_sensitive=True),
               help="commands, default command is 'create-update'")
 @click.option("-p", "--path", type=str, help="Path of the folder")
 @click.option("-new", multiple=True, type=click.Choice(('user', 'token'), case_sensitive=False), 
@@ -43,13 +44,13 @@ def main(ctx, command, path, new, name, add_collab, visibility, git_ignore, rm_g
     create_resource_dir() #create resources
     # Update command is invoked
     if command == "update": # check if -u or --update is present when the user runs the script
-        update(path=path, name=name, add_collab=add_collab, new=new, visibility=visibility)
+        return update(path=path, name=name, add_collab=add_collab, new=new, visibility=visibility)
     elif command == "delete":
-        delete(path=path, name=name, new=new)
-        return
+        return delete(path=path, name=name, new=new)
     elif command == "create-update":
-        create_update(path=path, name=name, new=new, add_collab=add_collab, visibility=visibility)
-        return
+        return create_update(path=path, name=name, new=new, add_collab=add_collab, visibility=visibility)
+    elif command == "clone":
+        return clone(path)
 
 # Functions responsable for commands
 def create_update(path, name, new, add_collab, visibility):
@@ -99,7 +100,7 @@ def update(path, name, new, visibility, add_collab):
     if add_collab:
         add_collaborators(path, name, new, username=username, token=token, name=repo_name)
     if visibility:
-        changeVisibility(username=username, token=token, name=repo_name)
+        changeVisibility(username=username, token=token, repo_name=repo_name)
     create_repo = repository_creation_needed(url,token, path)
     save_token_if_not_saved(token)
     if create_repo:
@@ -122,13 +123,17 @@ def delete(path, name, new):
         open_bash(f"curl -X DELETE -H 'Authorization: token {token}' https://api.github.com/repos/{username}/{repo_name}", stdout=PIPE, stderr=PIPE ,loading=loading)
         loading.stop()
 
+def clone(path:str):
+    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com")
+    run_cmd(f"git clone {github_url} {path}")
+
 # Handlers
 def handle_args(path: str, command: str, git_ignore, rm_git_ignore):
     if command is None:
         command = select_input("Which command would you like to execute:", 
                                choices=('create-update', 'update', 'delete'), 
                                default="create-update")
-    if command != "delete" or git_ignore or rm_git_ignore:
+    if command not in ("delete", "clone") or git_ignore or rm_git_ignore:
         if path is None:
             path = path_input("Enter path of the folder: ",  only_directories=True, default=os.getcwd(),
                             validate=lambda x: os.path.isdir(x), invalid_message="Invalid directory path!")
@@ -303,10 +308,10 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
     if "err" in process and "returncode" in process and process["returncode"] != 0: 
         if "hint: (e.g., 'git pull ...') before pushing again." in process["err"]:
             loading.abort()
-            click.echo("\n" + click.style(process["err"], fg="yellow"), color=True)
-            
+            print_color("\n" + process["err"], fg="yellow")            
             OPTION_1 = """Clone the repository, then just copy its .git folder to here, and therefore you will lose your current commits but not the past one's (from the cloned repo)"""
-            options = select_input("There is couple options to fixed it", choices=[OPTION_1])
+            OPTION_2 = "Exit"
+            options = select_input("There is couple options to fixed it", choices=[OPTION_1, OPTION_2])
             if options == OPTION_1:
                 temp_dir = "../temp" + str(int(time.time()))
                 open_bash(f"git clone https://{token}@github.com/{username}/{repo_name}.git {temp_dir}")
@@ -320,6 +325,9 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
                 if commit_again:
                     default_git_commit(path)
                 return add_remote_and_push(url, path, repo_name, username, token)
+            elif options == OPTION_2:
+                print_color("Exit", fg="green")
+                sys.exit(0)
         else:
             sys.exit(process["returncode"])
     loading.stop()
@@ -417,7 +425,7 @@ def info_about_repo(username,token,repo,collaboratorsCmdExist, path):
     if not repository_creation_needed( get_github_URL({"name":repo_name, "username":username}), token, path):
         return {"name":repo_name, "username":username}
     
-    private = confirm_input("want it to be private? (y/n): ")
+    private = confirm_input("Want it to be private: ")
     if collaboratorsCmdExist:
         collaborators = True
     elif not collaboratorsCmdExist:
@@ -508,16 +516,7 @@ def prompt_collaborators():
     isCollaborators = confirm_input("do you want collaborators with you in this repository: ")
     return isCollaborators
 
-def changeVisibility(**credentials):
-    username = credentials["username"]
-    token = credentials["token"]
-    repo_name = credentials["repo_name"]
-    # visiblity = promptPyInquirer({
-    #     "name": "visibility",
-    #     "question": "change it to?",
-    #     "choices": ["private", "public"]
-    # })["visibility"]
-    
+def changeVisibility(username, token, repo_name):
     visiblity = select_input(
         "Change it to:",
         choices=["private", "public"]
