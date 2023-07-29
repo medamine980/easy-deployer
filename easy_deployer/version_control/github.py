@@ -43,7 +43,7 @@ def main(ctx, command, path, new, name, add_collab, visibility, git_ignore, rm_g
     create_resource_dir() #create resources
     # Update command is invoked
     if command == "update": # check if -u or --update is present when the user runs the script
-        update(path=path, name=name, add_collab=add_collab, new=new)
+        update(path=path, name=name, add_collab=add_collab, new=new, visibility=visibility)
     elif command == "delete":
         delete(path=path, name=name, new=new)
         return
@@ -86,20 +86,19 @@ def create_update(path, name, new, add_collab, visibility):
     master_to_main(path)
     add_remote_and_push(url, path, username=username, token=token, repo_name=data["name"])
 
-def update(path, name, new, add_collab):
+def update(path, name, new, visibility, add_collab):
     """
     it gets called when "-u" or "--update" are available
     it updates or (pushs) the specified directory to the specified repository
     """
     default_git_commit(path)
-    args = {}
     username = handle_username(new)
     token = handle_token(new, username)
     repo_name = get_repo_name(name, path)
     url = get_github_URL({"username":username,"name":repo_name})
     if add_collab:
         add_collaborators(path, name, new, username=username, token=token, name=repo_name)
-    if args["visibility"]:
+    if visibility:
         changeVisibility(username=username, token=token, name=repo_name)
     create_repo = repository_creation_needed(url,token, path)
     save_token_if_not_saved(token)
