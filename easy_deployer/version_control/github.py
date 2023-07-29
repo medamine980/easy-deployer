@@ -299,9 +299,8 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
     run_cmd(f"git -C {path} remote add {remote_name} {url}", stdout=PIPE, stderr=PIPE)
     process = run_cmd(f"git -C {path} push -u {remote_name} main --dry-run", quit_on_error=False,
                       returncode=True, stderr=PIPE)
-    print(process)
     run_cmd(f"git -C {path} push -u {remote_name} main")
-    if "err" in process: 
+    if "err" in process and "returncode" in process and process["returncode"] != 0: 
         if "hint: (e.g., 'git pull ...') before pushing again." in process["err"]:
             loading.abort()
             click.echo("\n" + click.style(process["err"], fg="yellow"), color=True)
