@@ -43,7 +43,7 @@ def main(ctx, command, path, new, name, add_collab, visibility, git_ignore, rm_g
     create_resource_dir() #create resources
     # Update command is invoked
     if command == "update": # check if -u or --update is present when the user runs the script
-        update(path=path, name=name, add_collab=add_collab)
+        update(path=path, name=name, add_collab=add_collab, new=new)
     elif command == "delete":
         delete(path=path, name=name, new=new)
         return
@@ -300,6 +300,7 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
     run_cmd(f"git -C {path} remote add {remote_name} {url}", stdout=PIPE, stderr=PIPE)
     process = run_cmd(f"git -C {path} push -u {remote_name} main --dry-run", quit_on_error=False,
                       returncode=True, stderr=PIPE)
+    print(process)
     run_cmd(f"git -C {path} push -u {remote_name} main")
     if "err" in process: 
         if "hint: (e.g., 'git pull ...') before pushing again." in process["err"]:
