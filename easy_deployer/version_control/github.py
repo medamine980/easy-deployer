@@ -315,6 +315,7 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
                           shopt -s extglob
                           cp -r !(.git) "{temp_dir}"
                           cp -r {temp_dir}/.git .
+                          rm -r {temp_dir}
                           """)
                 commit_again = confirm_input("A git commit is about to happen, are you ok with that")
                 if commit_again:

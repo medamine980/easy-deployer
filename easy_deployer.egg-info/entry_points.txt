@@ -1,2 +1,2 @@
 [console_scripts]
-easy-deployer = cli:cli
+easy-deployer = easy_deployer.cli:cli

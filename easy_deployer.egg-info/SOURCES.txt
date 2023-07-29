@@ -2,10 +2,12 @@ LICENSE.txt
 README.md
 setup.py
 easy_deployer/__init__.py
+easy_deployer/cli.py
 easy_deployer.egg-info/PKG-INFO
 easy_deployer.egg-info/SOURCES.txt
 easy_deployer.egg-info/dependency_links.txt
 easy_deployer.egg-info/entry_points.txt
+easy_deployer.egg-info/requires.txt
 easy_deployer.egg-info/top_level.txt
 easy_deployer/hostings/__init__.py
 easy_deployer/hostings/heroku.py

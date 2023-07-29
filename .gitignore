@@ -1,3 +1,4 @@
 ignore
 dist
 build
+__pycache__

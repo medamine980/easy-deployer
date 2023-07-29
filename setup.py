@@ -4,7 +4,7 @@ with open("README.md") as f:
     long_desc = f.read()
 setup(
     name="easy_deployer",
-    version="0.1.9",
+    version="0.1.12",
     description="A package to simplify and quickly deploy your project/app/folders to the supported platforms.",
     long_description=long_desc,
     long_description_content_type='text/markdown',
@@ -15,7 +15,12 @@ setup(
     license="MIT",
     keywords=["python", "github", "github-deployer", "heroku", 
     "heroku-deployer", "deploy", "easy", "easy-deployer", "simple", "simple-deployer"],
-    install_required=["pipreqs"],
+    install_requires=[
+        'pipreqs',
+        'Click',
+        'InquirerPy'
+    ],
+    # install_required=["pipreqs"],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
@@ -25,7 +30,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'easy-deployer = cli:cli',
+            'easy-deployer = easy_deployer.cli:cli',
         ]
     }
     # console_scripts={
