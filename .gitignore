@@ -2,3 +2,4 @@ ignore
 dist
 build
 __pycache__
+easy_deployer.egg-info
