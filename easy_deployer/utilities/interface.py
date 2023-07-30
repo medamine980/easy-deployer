@@ -11,7 +11,7 @@ def text_input(
         multiline: bool = False,
         invalid_message: str = None,
         validate: Callable[[str], None] = None
-        ):
+        ) -> str:
     return inquirer.text(
         message=message,
         default=default,
@@ -31,7 +31,7 @@ def path_input(
         only_files: bool = False,
         only_directories: bool = False,
         validate: Callable[[str], None] = None
-        ):
+        ) -> str:
     return inquirer.filepath(
         message=message,
         default=default,
@@ -54,7 +54,7 @@ def select_input(
         message: str,
         default: str="",
         choices: list=[]
-):
+) -> str:
     return inquirer.select(
         message=message,
         default=default,
@@ -63,7 +63,7 @@ def select_input(
 
 def print_color(text, fg="white", bg:str or tuple = None, bold: bool = None, underline: bool = None,
                 overline: bool = None, blink: bool = None, italic: bool = None, dim: bool = None,
-                reverse: bool = None, strikethrough: bool = None, reset: bool = True):
+                reverse: bool = None, strikethrough: bool = None, reset: bool = True) -> None:
     click.secho(text, color=True, fg=fg, bg=bg, bold=bold, underline=underline, overline=overline,
                 blink=blink, italic=italic, dim=dim, reverse=reverse, strikethrough=strikethrough, reset=reset)
 

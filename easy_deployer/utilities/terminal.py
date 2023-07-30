@@ -3,7 +3,7 @@ import os
 
 from subprocess import Popen, PIPE, DEVNULL
 
-from easy_deployer.utilities.process import Loading, get_os
+from easy_deployer.utilities.process import Loading, get_os, get_commit_file_path
 from easy_deployer.utilities.interface import text_input
 from easy_deployer.utilities import ERROR_CODES
 
@@ -99,7 +99,10 @@ def default_git_commit(path):
         if "\"" in commit_msg:
             print("double quotes detected, error!")
             sys.exit(ERROR_CODES["double_quotes_not_allowed"])
-        cmds.append(f"git -C {path} commit -m \"{commit_msg}\"")
+        COMMIT_FILE_PATH = get_commit_file_path()
+        with open(COMMIT_FILE_PATH, "w") as file :
+            file.write(commit_msg)
+        cmds.append(f"git -C {path} commit -F {COMMIT_FILE_PATH}")
         for cmd in cmds:
             start_text="processing"
             if cmds.index(cmd) == 0:

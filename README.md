@@ -23,4 +23,4 @@ Without python: you can download the [executable binary][bin/exe]
 The easiest way is to just execute the easy-deployer executable and then you're gonna be prompted to enter some information such as: where do you want deploy it? what type of commande would you like to choose etc...
 Otherwise you can use the option --help for more info.
 
-[bin/exe]: bin/easy-deployer.exe
+[bin/exe]: https://github.com/medamine980/easy-deployer/raw/main/bin/easy-deployer.exe

@@ -6,10 +6,14 @@ import itertools
 import threading
 
 
+def get_commit_file_path() -> str:
+    if get_os() == "windows":
+        return "C:\\.gd\\.commit-msg"
+
 def get_os():
     if sys.platform == "win32":
         return "windows"
-    
+
 def open_browser(url):
     print("[¤] press any key to open repository in your browser or q to quit the program.")
     if keyboard.read_key() == "q":
