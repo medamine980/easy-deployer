@@ -9,7 +9,7 @@ from subprocess import PIPE, DEVNULL
 
 from easy_deployer.utilities import ERROR_CODES
 from easy_deployer.utilities.terminal import check_software, handle_git_init, default_git_commit, run_cmd\
-    ,open_bash
+    ,open_bash, handle_git_config
 from easy_deployer.utilities.process import Loading, get_os, open_browser
 from easy_deployer.utilities.interface import path_input, text_input, confirm_input, select_input,\
     print_color, print_warning
@@ -41,6 +41,7 @@ def main(ctx, command, path, new, name, add_collab, visibility, git_ignore, rm_g
         os.system("cls") # clears the console
     path, command = handle_args(path, command, git_ignore=git_ignore, rm_git_ignore=rm_git_ignore)
     check_software("git", "git --help") # check if git is installed in the current machine
+    handle_git_config()
     create_resource_dir() #create resources
     # Update command is invoked
     if command == "update": # check if -u or --update is present when the user runs the script
@@ -343,9 +344,9 @@ def check_repository_name(repo_name):
         new_name = regex.sub("-", repo_name)
         print_warning("Your new repository will be created as:",new_name,sep="\n\t",flush=True)
         confirm = confirm_input("Do you want to Try another one?: ", default=True)
-        if not confirm:
+        if confirm:
             repo_name = check_repository_name(text_input("Try another repository name: "))
-        elif confirm:
+        elif not confirm:
             repo_name = new_name
     return repo_name
 
@@ -455,7 +456,7 @@ def cache_token(username):
     path_token = path_input(
         message="Enter either path of the file that contains the access token, or enter the access toke directly:",
         invalid_message="Invalid path",
-        validate=lambda x: os.path.isfile(x) if re.search("[/\/]") else len(x) > 0
+        validate=lambda x: os.path.isfile(x) if re.search("[/\/]", x) else len(x) > 0
     )
     if os.path.isfile(path_token):
         with open(path_token, 'r') as f:

@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 from subprocess import Popen, PIPE, DEVNULL
 
@@ -13,6 +14,21 @@ def check_software(name, cmd, url=None):
     run_cmd(cmd, stdout=DEVNULL,
         error= err
     )
+
+def handle_git_config():
+    username_cmd = "git config --get user.name"
+    email_cmd = "git config --get user.email"
+    out = run_cmd(username_cmd, stdout=PIPE, quit_on_error=False)
+    if not out:
+        username = text_input("Enter your git username:", invalid_message=
+                              "The following the characters are not allowed: (\")", 
+                              validate=lambda x:not any([char in x for char in ["\""]]))
+        run_cmd(f"git config --global user.name \"{username}\"")
+    out = run_cmd(email_cmd, stdout=PIPE, quit_on_error=False)
+    if not out:
+        email = text_input("Enter your git email:", invalid_message="Invalid email!", 
+                           validate=lambda x: re.search("^[\w\d_\-.|\(\)/]+@[\w\d.-]+$", x))
+        run_cmd(f"git config --global user.email {email}")
 
 def run_cmd(
         cmd, 
