@@ -121,7 +121,13 @@ def delete(path, name, new):
     elif not create_repo:
         loading = Loading(start_text="Deleting Repository",stop_text="Repository Deleted", type="dynamic", timeout=.1)
         loading.start()
-        open_bash(f"curl -X DELETE -H 'Authorization: token {token}' https://api.github.com/repos/{username}/{repo_name}", stdout=PIPE, stderr=PIPE ,loading=loading)
+        process = open_bash(f"curl -X DELETE -H 'Authorization: token {token}' https://api.github.com/repos/{username}/{repo_name}", stdout=PIPE, stderr=PIPE ,loading=loading, 
+                  returncode=True)
+        if "Must have admin rights to Repository" in process["out"]:
+            print_color(
+"""\nYou don't have the right to delete the repository, most likely because of the token scopes.
+Go to https://github.com/settings/tokens and click the token you are using, and then add the \"delete_repo\" scope.""", bg="red")
+            return loading.abort()
         loading.stop()
 
 def clone(path:str):
@@ -419,7 +425,8 @@ def get_github_URL(data):
 
 #INFO
 def info_about_token():
-    print("If you don't have your token yet go get it from https://github.com/settings/tokens (you must be loggedIn)")
+    print("\nIf you don't have your token yet go get it from https://github.com/settings/tokens (you must be loggedIn), ", end="")
+    print_color("and add the repo scope!",fg="bright_cyan")
 
 def info_about_repo(username,token,repo,collaboratorsCmdExist, path):
     repo_name = get_repo_name(repo, path)
