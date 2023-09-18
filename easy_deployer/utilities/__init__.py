@@ -8,6 +8,7 @@ class ERROR_CODE(TypedDict):
     token_is_none: int
     command_not_found: int
     double_quotes_not_allowed: int
+    mode_error: int
 
 ERROR_CODES: ERROR_CODE = {
     "invalid_path": 1,
@@ -16,5 +17,6 @@ ERROR_CODES: ERROR_CODE = {
     "token_file_not_found": 4,
     "token_is_none": 5,
     "command_not_found": 6,
-    "double_quotes_not_allowed": 7
+    "double_quotes_not_allowed": 7,
+    "mode_error": 8
 }

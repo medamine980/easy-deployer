@@ -14,7 +14,8 @@ from easy_deployer.utilities.process import Loading, get_os, open_browser
 from easy_deployer.utilities.interface import path_input, text_input, confirm_input, select_input,\
     print_color, print_warning
 
-available_commands = ('create-update', 'update', 'delete', 'clone')
+available_commands = ('create-update', 'update', 'delete', 'clone', 'pull')
+available_modes = ('owner', 'collab')
 
 @click.command(
         help="""You basically enter one of the following commands:\n
@@ -30,37 +31,44 @@ then you need to specify the path by using the -p or --path argument."""
 @click.option("-p", "--path", type=str, help="Path of the folder")
 @click.option("-new", multiple=True, type=click.Choice(('user', 'token'), case_sensitive=False), 
               help="if you want to resave user or token")
+@click.option("-m", "--mode", type=click.Choice(available_modes, case_sensitive=True), 
+              help="A mode which tells if you are the owner or a collaborator (by default it is on owner mode)")
 @click.option("-repo", "--repository", "name", type=str, help="Repository name")
-@click.option("-ac", "--add-collaborators", "add_collab", is_flag=True, help="If you want to add collaborators, repository must exist to do so else you'll get an error")
+@click.option("-ac", "--add-collaborators", "add_collab", is_flag=True, 
+              help="If you want to add collaborators, repository must exist to do so else you'll get an error")
 @click.option("-visibility", is_flag=True, help="Change visibility")
 @click.option("-git-ig", "--git-ignore", is_flag=True, help="Add a file to the .gitignore file")
 @click.option("-rm-git-ig", "--rm-git-ignore", is_flag=True, help="Remove file from .gitignore")
 @click.pass_context
-def main(ctx, command, path, new, name, add_collab, visibility, git_ignore, rm_git_ignore):
+def main(ctx, command, path, new, mode, name, add_collab, visibility, git_ignore, rm_git_ignore):
     if get_os() == "windows": # to clean the screen
         os.system("cls") # clears the console
-    path, command = handle_args(path, command, git_ignore=git_ignore, rm_git_ignore=rm_git_ignore)
+    path, command, mode = handle_args(path, command, mode=mode, git_ignore=git_ignore, rm_git_ignore=rm_git_ignore)
     check_software("git", "git --help") # check if git is installed in the current machine
     handle_git_config()
     create_resource_dir() #create resources
     # Update command is invoked
     if command == "update": # check if -u or --update is present when the user runs the script
-        return update(path=path, name=name, add_collab=add_collab, new=new, visibility=visibility)
+        return update(path=path, name=name, mode=mode, add_collab=add_collab, new=new, visibility=visibility)
     elif command == "delete":
-        return delete(path=path, name=name, new=new)
+        return delete(path=path, name=name, mode=mode, new=new)
     elif command == "create-update":
-        return create_update(path=path, name=name, new=new, add_collab=add_collab, visibility=visibility)
+        return create_update(path=path, name=name, mode=mode, new=new, add_collab=add_collab, visibility=visibility)
     elif command == "clone":
         return clone(path)
+    elif command == "pull":
+        return pull(path)
+    
 
 # Functions responsable for commands
-def create_update(path, name, new, add_collab, visibility):
+def create_update(path, name, mode, new, add_collab, visibility):
     """This functions runs when the user chooses the 'create-update' command"""
     info_about_token() # info telling the user that he needs a token to create a repository
     default_git_commit(path) # git add, git commit etc...
     username = handle_username(new) # takes care of the username 
     token = handle_token(new, username) # takes care of the access token
-    data = info_about_repo(username, token, name, add_collab, path)
+    data = info_about_repo(username=username, token=token, name=name, mode=mode,add_collab=add_collab, path=path)
+    data["mode"] = mode
     url = get_github_URL(data)
     create_repo = repository_creation_needed(url, token, path)
     if create_repo:
@@ -88,7 +96,7 @@ def create_update(path, name, new, add_collab, visibility):
     master_to_main(path)
     add_remote_and_push(url, path, username=username, token=token, repo_name=data["name"])
 
-def update(path, name, new, visibility, add_collab):
+def update(path, name, mode, new, visibility, add_collab):
     """
     it gets called when "-u" or "--update" are available
     it updates or (pushs) the specified directory to the specified repository
@@ -97,7 +105,7 @@ def update(path, name, new, visibility, add_collab):
     username = handle_username(new)
     token = handle_token(new, username)
     repo_name = get_repo_name(name, path)
-    url = get_github_URL({"username":username,"name":repo_name})
+    url = get_github_URL({"username":username,"name":repo_name, "mode":mode})
     if add_collab:
         add_collaborators(path, name, new, username=username, token=token, name=repo_name)
     if visibility:
@@ -110,11 +118,11 @@ def update(path, name, new, visibility, add_collab):
         master_to_main(path)
         add_remote_and_push(url, path, username=username, token=token, repo_name=repo_name)
 
-def delete(path, name, new):
+def delete(path, name, mode:str, new):
     username = handle_username(new)
     token = handle_token(new, username)
     repo_name = get_repo_name(name, path)
-    url = get_github_URL({ "username":username, "name":repo_name })
+    url = get_github_URL({ "username":username, "name":repo_name, "mode":mode })
     create_repo = repository_creation_needed(url=url,token=token, path=path)
     if create_repo:
         repo_not_found()
@@ -131,14 +139,27 @@ Go to https://github.com/settings/tokens and click the token you are using, and 
         loading.stop()
 
 def clone(path:str):
-    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com")
+    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com/")
     run_cmd(f"git clone {github_url} {path}")
 
+def pull(path: str):
+    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com/")
+    run_cmd(f"git -C {path} pull {github_url}")
+
 # Handlers
-def handle_args(path: str, command: str, git_ignore, rm_git_ignore):
+def handle_args(path: str, command: str, mode:str, git_ignore, rm_git_ignore):
+    if mode is None:
+        mode = "owner"
+    if mode == available_modes[1] and command == "create-update":
+        print_color("You cannot choose this command (create-update) in this mode!", bg="yellow")
+        sys.exit(ERROR_CODES["mode_error"])
     if command is None:
-        command = select_input("Which command would you like to execute:", 
-                               choices=('create-update', 'update', 'delete'), 
+        if mode == available_modes[1]:
+            command = select_input("Which command would you like to execute:", 
+                               choices=('update', 'delete'))
+        else:
+            command = select_input("Which command would you like to execute:", 
+                               choices=available_commands, 
                                default="create-update")
     if command not in ("delete", "clone") or git_ignore or rm_git_ignore:
         if path is None:
@@ -151,8 +172,8 @@ def handle_args(path: str, command: str, git_ignore, rm_git_ignore):
             handle_git_ignore(path)
         if rm_git_ignore:
             handle_rm_git_ignore(path)
-        return os.path.abspath(path.strip()), command
-    return None, command
+        return os.path.abspath(path.strip()), command, mode
+    return None, command, mode
 
 def handle_git_ignore(path):
     files_dirs = os.listdir(path)
@@ -291,11 +312,11 @@ def handle_collaborators(**credentials):
 
 
 #ADDERS
-def add_collaborators(path, name, new, username=None, token=None, repo=None):
+def add_collaborators(path, name, new, mode, username=None, token=None, repo=None):
     username = username if username else handle_username(new)
     token = token if token else handle_token(new, username)
     repo = repo if repo else get_repo_name(name, path)
-    url = get_github_URL({"username": username, "name":repo})
+    url = get_github_URL({"username": username, "name":repo, "mode": mode})
     repositoryNeeded = repository_creation_needed(url, token, path)
     if repositoryNeeded:
         print("ERROR\nRepository doesn't exist, check your repository name!")
@@ -421,18 +442,23 @@ def get_repo_name(repo, path):
 
 def get_github_URL(data):
     # data['name'] = data['name'].replace(" ","-")
-    return f"https://github.com/{data['username']}/{data['name']}.git"
+    username = data['username']
+    if data["mode"] == "collab":
+        username = text_input("Owner's github username: ")
+    return f"https://github.com/{username}/{data['name']}.git"
 
 #INFO
 def info_about_token():
     print("\nIf you don't have your token yet go get it from https://github.com/settings/tokens (you must be loggedIn), ", end="")
     print_color("and add the repo scope!",fg="bright_cyan")
 
-def info_about_repo(username,token,repo,collaboratorsCmdExist, path):
+def info_about_repo(username,token,repo, mode,collaboratorsCmdExist, path):
     repo_name = get_repo_name(repo, path)
-    if not repository_creation_needed( get_github_URL({"name":repo_name, "username":username}), token, path):
+    if not repository_creation_needed( get_github_URL({"name":repo_name, "username":username, "mode": mode}), token, path):
         return {"name":repo_name, "username":username}
-    
+    if mode == "collab":
+        print_color("Repository does not exist!")
+        sys.exit(ERROR_CODES["mode_error"])
     private = confirm_input("Want it to be private: ")
     if collaboratorsCmdExist:
         collaborators = True
