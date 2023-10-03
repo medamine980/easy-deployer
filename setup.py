@@ -6,7 +6,7 @@ with open("README.md") as f:
 
 setup(
     name="easy_deployer",
-    version="1.0.1",
+    version="1.0.2",
     description="A package to simplify and quickly deploy your project/app/folders to the supported platforms.",
     long_description=long_desc,
     long_description_content_type='text/markdown',

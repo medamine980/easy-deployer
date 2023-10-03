@@ -67,7 +67,8 @@ def create_update(path, name, mode, new, add_collab, visibility):
     default_git_commit(path) # git add, git commit etc...
     username = handle_username(new) # takes care of the username 
     token = handle_token(new, username) # takes care of the access token
-    data = info_about_repo(username=username, token=token, name=name, mode=mode,add_collab=add_collab, path=path)
+    data = info_about_repo(username=username, token=token, repo=name, mode=mode,
+                           collaboratorsCmdExist=add_collab, path=path)
     data["mode"] = mode
     url = get_github_URL(data)
     create_repo = repository_creation_needed(url, token, path)
@@ -452,7 +453,7 @@ def info_about_token():
     print("\nIf you don't have your token yet go get it from https://github.com/settings/tokens (you must be loggedIn), ", end="")
     print_color("and add the repo scope!",fg="bright_cyan")
 
-def info_about_repo(username,token,repo, mode,collaboratorsCmdExist, path):
+def info_about_repo(username, token, repo, mode, collaboratorsCmdExist, path):
     repo_name = get_repo_name(repo, path)
     if not repository_creation_needed( get_github_URL({"name":repo_name, "username":username, "mode": mode}), token, path):
         return {"name":repo_name, "username":username}
