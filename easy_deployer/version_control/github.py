@@ -140,8 +140,8 @@ Go to https://github.com/settings/tokens and click the token you are using, and 
         loading.stop()
 
 def clone(path:str):
-    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com/")
-    run_cmd(f"git clone {github_url} {path}")
+    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com/<username>/<repo_name>")
+    run_cmd(f"git -C {path} clone {github_url}")
 
 def pull(path: str):
     github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com/")
@@ -162,7 +162,7 @@ def handle_args(path: str, command: str, mode:str, git_ignore, rm_git_ignore):
             command = select_input("Which command would you like to execute:", 
                                choices=available_commands, 
                                default="create-update")
-    if command not in ("delete", "clone") or git_ignore or rm_git_ignore:
+    if command not in ("delete") or git_ignore or rm_git_ignore:
         if path is None:
             path = path_input("Enter path of the folder: ",  only_directories=True, default=os.getcwd(),
                             validate=lambda x: os.path.isdir(x), invalid_message="Invalid directory path!")
@@ -364,10 +364,9 @@ def add_remote_and_push(url, path, repo_name, username, token, remote_name="orig
 
 #CHECKERS
 def check_repository_name(repo_name):
-    regex = re.compile("[^A-Za-z0-9_\-]{1,}")
+    regex = re.compile("[^A-Za-z0-9_\-.]{1,}")
     max_char = 100
     repo_name = repo_name[:max_char]
-    
     if regex.search(repo_name):
         new_name = regex.sub("-", repo_name)
         print_warning("Your new repository will be created as:",new_name,sep="\n\t",flush=True)
@@ -376,6 +375,11 @@ def check_repository_name(repo_name):
             repo_name = check_repository_name(text_input("Try another repository name: "))
         elif not confirm:
             repo_name = new_name
+    if '.' in repo_name:
+        print_color("Your repository contains a '.', which is gonna throw an error when using other features of the app!", fg="yellow")
+        confirm = confirm_input("Do you want to Try another one?: ", default=True)
+        if confirm:
+            repo_name = check_repository_name(text_input("Try another repository name: "))
     return repo_name
 
 def checkTokenValidation(token):

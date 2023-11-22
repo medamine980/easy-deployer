@@ -5,7 +5,7 @@ import re
 from subprocess import Popen, PIPE, DEVNULL
 
 from easy_deployer.utilities.process import Loading, get_os, get_commit_file_path
-from easy_deployer.utilities.interface import text_input
+from easy_deployer.utilities.interface import text_input, path_input, print_color
 from easy_deployer.utilities import ERROR_CODES
 
 def check_software(name, cmd, url=None):
@@ -131,6 +131,34 @@ def default_git_commit(path):
             loading.start()
             run_cmd(cmd, stdout=PIPE, stderr=PIPE, loading=loading)
             loading.stop()
+
+def advanced_git_commit(path):
+    handle_git_init(path)
+    loading = Loading(start_text="Adding Files", stop_text="", timeout=1)
+    while True:            
+        try:
+            run_cmd("git status", quit_on_error=False)
+            files = path_input("Enter the file(s) you want to add (seperated by semi-colon ';'): ", 
+                               validate= lambda files: 
+                               all([os.path.exists(f) for f in files.split(";")]))
+            loading.start_text = "Adding Files"
+            loading.start()
+            run_cmd(f"git add {' '.join(files.split(';'))}", loading=loading)
+            loading.stop()
+            commit_msg = text_input("commit message: ", 
+                                        instruction="(double quotes are not allowed)")
+            if "\"" in commit_msg:
+                print_color("double quotes detected, error!", bg="red")
+                sys.exit(ERROR_CODES["double_quotes_not_allowed"])
+            loading.start_text = "Committing changes"
+            loading.start()
+            run_cmd(f"git commit -m \"{commit_msg}\"")
+            loading.stop()
+        except KeyboardInterrupt:
+            print("Done")
+            break
+    
+
 
 def handle_git_init(path):
     files_dirs = os.listdir(path)

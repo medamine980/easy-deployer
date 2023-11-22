@@ -7,6 +7,7 @@ from InquirerPy import inquirer
 
 def text_input(
         message: str, 
+        instruction: str="",
         default: str="", 
         multiline: bool = False,
         invalid_message: str = None,
@@ -14,10 +15,12 @@ def text_input(
         ) -> str:
     return inquirer.text(
         message=message,
+        instruction=instruction,
         default=default,
         multiline=multiline,
         validate=validate,
         invalid_message=invalid_message,
+        multicolumn_complete=False
     ).execute()
 
 
@@ -26,6 +29,7 @@ def text_input(
 
 def path_input(
         message: str, 
+        instruction: str = "",
         default: str="", 
         invalid_message: str = None,
         only_files: bool = False,
@@ -34,11 +38,12 @@ def path_input(
         ) -> str:
     return inquirer.filepath(
         message=message,
+        instruction=instruction,
         default=default,
         validate=validate,
         invalid_message=invalid_message,
         only_files=only_files,
-        only_directories=only_directories
+        only_directories=only_directories,
     ).execute()
 
 def confirm_input(
