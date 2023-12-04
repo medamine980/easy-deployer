@@ -144,7 +144,7 @@ def clone(path:str):
     run_cmd(f"git -C {path} clone {github_url}")
 
 def pull(path: str):
-    github_url = text_input(f"Entrer the github url you wish to clone to ({path}):", default="https://github.com/")
+    github_url = text_input(f"Entrer the github url you wish to pull to ({path}):", default="https://github.com/<username>/<repo_name>")
     run_cmd(f"git -C {path} pull {github_url}")
 
 # Handlers

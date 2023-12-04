@@ -1,4 +1,3 @@
-
 from setuptools import setup, find_packages
 
 with open("README.md") as f:
@@ -6,7 +5,7 @@ with open("README.md") as f:
 
 setup(
     name="easy_deployer",
-    version="1.0.7",
+    version="1.0.8",
     description="A package to simplify and quickly deploy your project/app/folders to the supported platforms.",
     long_description=long_desc,
     long_description_content_type='text/markdown',
@@ -23,7 +22,6 @@ setup(
         'Click',
         'InquirerPy'
     ],
-    # install_required=["pipreqs"],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',

@@ -1,7 +1,7 @@
 from .version_control import github_main
 from .hostings import heroku_main
 
-__version__: str = "1.0.7"
+__version__: str = "1.0.8"
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
